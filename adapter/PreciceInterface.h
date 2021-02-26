@@ -38,9 +38,11 @@ typedef struct PreciceInterface {
 
 	// Interface face elements
 	int numElements;
+	int num2DElements; // Elements in a single plane in case of quasi 2D-3D mapping
 	int * elementIDs;
 	int * faceIDs;
 	double * faceCenterCoordinates;
+	double * faceCenter2DCoordinates; // 2D coordinates for quasi 2D-3D coupling
 	int faceSetID;
 	int faceCentersMeshID;
 	char * faceCentersMeshName;
@@ -74,6 +76,12 @@ typedef struct PreciceInterface {
 
 	// Mapping type if nearest-projection mapping
 	int mapNPType;
+
+	// Indicates that user has provided a valid nodes mesh
+	int validNodesMesh;
+
+	// Indicates that user has provided a valid face centers mesh
+	int validFaceCenterMesh;
 
 	// Indicates if pseudo 2D-3D coupling is implemented
 	int quasi2D3D;
@@ -262,12 +270,6 @@ void PreciceInterface_ConfigureFaceCentersMesh( PreciceInterface * interface, Si
  * @param sim: Structure with CalculiX data
  */
 void PreciceInterface_ConfigureNodesMesh( PreciceInterface * interface, SimulationData * sim );
-
-/**
- * @brief Terminate execution if the nodes mesh ID is not valid
- * @param interface
- */
-void PreciceInterface_EnsureValidNodesMeshID( PreciceInterface * interface );
 
 /**
  * @brief Configures the faces mesh (for tetrahedral elements only)

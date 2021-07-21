@@ -74,7 +74,7 @@ ITG nk,ne,nboun,nmpc,nforc,nload,nprint=0,nset,nalset,nentries=17,
   nprop=0,itpamp=0,iviewfile,nkold,nevdamp_=0,npt_=0,cyclicsymmetry,
   nmethodl,iaxial=1,inext=0,icontact=0,nobject=0,nobject_=0,iit=-1,
   nzsprevstep[3],memmpcref_,mpcfreeref=-1,maxlenmpcref,*nodempcref=NULL,
-  *ikmpcref=NULL,isens=0,namtot=0,nstam=0,ndamp=0,nef=0;
+  *ikmpcref=NULL,isens=0,namtot=0,nstam=0,ndamp=0,nef=0,irestart=0;
 
 ITG *meminset=NULL,*rmeminset=NULL;
 
@@ -91,7 +91,7 @@ double *co=NULL, *xboun=NULL, *coefmpc=NULL, *xforc=NULL,*clearini=NULL,
 	*xstate=NULL, *trab=NULL, *ener=NULL, *shcon=NULL, *cocon=NULL,
         *cs=NULL,*tietol=NULL,*fmpc=NULL,*prop=NULL,*t0g=NULL,*t1g=NULL,
         *xbody=NULL,*xbodyold=NULL,*coefmpcref=NULL,*dacon=NULL,*vel=NULL,
-        *velo=NULL,*veloo=NULL,energy[5]={0.,0.,0.,0.,0.};
+        *velo=NULL,*veloo=NULL,energy[5]={0.,0.,0.,0.,0.}, *accrestart=NULL;
     
  double ctrl[57]={4.5,8.5,9.5,16.5,10.5,4.5,0.,5.5,0.,0.,0.25,0.5,0.75,0.85,0.,0.,1.5,0.,0.005,0.01,0.,0.,0.02,1.e-5,1.e-3,1.e-8,1.e30,1.5,0.25,1.01,1.,1.,5.e-7,5.e-7,1.e-4,5.e-7,5.e-7,5.e-7,5.e-7,-1.,1.e20,1.e20,1.e20,1.e20,1.e20,1.e20,1.e20,1.5,0.5,20.5,0.5,1.5,1.5,0.001,0.1,100.5,60.5};
 
@@ -429,6 +429,7 @@ while(istat>=0) {
 
     NNEW(vold,double,mt*nk_);
     NNEW(veold,double,mt*nk_);
+    NNEW(accrestart,double,mt*nk_);
 
     /* CFD-results */
 
@@ -484,10 +485,13 @@ while(istat>=0) {
       if((nmethod!=4)&&(nmethod!=5)&&(nmethod!=8)&&(nmethod!=9)&& 
        ((abs(nmethod)!=1)||(iperturb[0]<2))){
         NNEW(veold,double,mt*nk_);
+        NNEW(accrestart,double,mt*nk_);
     }
     else{
       RENEW(veold,double,mt*nk_);
       DMEMSET(veold,mt*nk,mt*nk_,0.);
+      RENEW(accrestart,double,mt*nk_);
+      DMEMSET(accrestart,mt*nk,mt*nk_,0.);
     }
     RENEW(vold,double,mt*nk_);
     DMEMSET(vold,mt*nk,mt*nk_,0.);
@@ -621,7 +625,7 @@ while(istat>=0) {
 	    heading,&iaxial,&nobject,objectset,&nprint_,iuel,&nuel_,
 	    nodempcref,coefmpcref,ikmpcref,&memmpcref_,&mpcfreeref,
 	    &maxlenmpcref,&memmpc_,&isens,&namtot,&nstam,dacon,vel,&nef,
-	    velo,veloo,ne2boun,itempuser));
+	    velo,veloo,ne2boun,itempuser,&irestart,accrestart));
 
 #ifdef CALCULIX_EXTERNAL_BEHAVIOURS_SUPPORT
   for(i=0;i!=nmat;++i){
@@ -955,8 +959,9 @@ while(istat>=0) {
   if((nmethod==4)||(nmethod==5)||(nmethod==8)||(nmethod==9)||
      ((abs(nmethod)==1)&&(iperturb[0]>=2))){
     RENEW(veold,double,mt*nk);
+    RENEW(accrestart,double,mt*nk);
   }
-  else {SFREE(veold);}
+  else {SFREE(veold);SFREE(accrestart);}
 
   if((nmethod == 4)&&(iperturb[0]>1)) {
     NNEW(accold,double,mt*nk);
@@ -1141,7 +1146,7 @@ if(preciceUsed) {
 	     ics,&nintpoint,&mortar,
 	     &ifacecount,typeboun,&islavsurf,&pslavsurf,&clearini,&nmat,
 	     xmodal,&iaxial,&inext,&nprop,&network,orname,vel,&nef,
-	     velo,veloo,energy,itempuser,preciceParticipantName,configFilename);
+	     velo,veloo,energy,itempuser,preciceParticipantName,configFilename,irestart,accrestart);
             
             memmpc_=mpcinfo[0];mpcfree=mpcinfo[1];icascade=mpcinfo[2];
             maxlenmpc=mpcinfo[3];
@@ -1179,7 +1184,7 @@ if(preciceUsed) {
 	     ics,&nintpoint,&mortar,
 	     &ifacecount,typeboun,&islavsurf,&pslavsurf,&clearini,&nmat,
 	     xmodal,&iaxial,&inext,&nprop,&network,orname,vel,&nef,
-	     velo,veloo,energy,itempuser,preciceParticipantName,configFilename);
+	     velo,veloo,energy,itempuser,preciceParticipantName,configFilename,irestart,accrestart);
                 
                 memmpc_=mpcinfo[0];mpcfree=mpcinfo[1];icascade=mpcinfo[2];
                 maxlenmpc=mpcinfo[3];
@@ -1213,7 +1218,7 @@ if(preciceUsed) {
 	     ics,&nintpoint,&mortar,
 	     &ifacecount,typeboun,&islavsurf,&pslavsurf,&clearini,&nmat,
 	     xmodal,&iaxial,&inext,&nprop,&network,orname,vel,&nef,
-	     velo,veloo,energy,itempuser,preciceParticipantName,configFilename);
+	     velo,veloo,energy,itempuser,preciceParticipantName,configFilename,irestart,accrestart);
                 
                 memmpc_=mpcinfo[0];mpcfree=mpcinfo[1];icascade=mpcinfo[2];
                 maxlenmpc=mpcinfo[3];
@@ -1297,7 +1302,7 @@ if(preciceUsed) {
 	     ics,&nintpoint,&mortar,
 	     &ifacecount,typeboun,&islavsurf,&pslavsurf,&clearini,&nmat,
 	     xmodal,&iaxial,&inext,&nprop,&network,orname,vel,&nef,
-	     velo,veloo,energy,itempuser);
+	     velo,veloo,energy,itempuser,irestart,accrestart);
 
 	memmpc_=mpcinfo[0];mpcfree=mpcinfo[1];icascade=mpcinfo[2];
         maxlenmpc=mpcinfo[3];
@@ -1664,7 +1669,7 @@ if(preciceUsed) {
 	ibody,xbody,&nbody,xbodyold,&ttime,qaold,cs,&mcs,output,
 	physcon,ctrl,typeboun,fmpc,tieset,&ntie,tietol,&nslavs,t0g,t1g,
 	&nprop,ielprop,prop,&mortar,&nintpoint,&ifacecount,islavsurf,
-	pslavsurf,clearini,irstrt,vel,&nef,velo,veloo,ne2boun));
+	pslavsurf,clearini,irstrt,vel,&nef,velo,veloo,ne2boun,accold));
     }
   } 
 	  
@@ -1734,7 +1739,7 @@ SFREE(ielmat);SFREE(matname);
 
 SFREE(sti);SFREE(eme);SFREE(ener);SFREE(xstate);
 
-SFREE(vold);SFREE(veold);SFREE(vel);SFREE(velo);SFREE(veloo);
+SFREE(vold);SFREE(veold);SFREE(vel);SFREE(velo);SFREE(veloo);SFREE(accrestart);
 
 if((ne1d!=0)||(ne2d!=0)){
     SFREE(iponor);SFREE(xnor);SFREE(knor);SFREE(thicke);SFREE(offset);

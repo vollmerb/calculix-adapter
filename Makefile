@@ -2,23 +2,23 @@
 # https://github.com/precice/calculix-adapter/wiki/Installation-instructions-for-CalculiX
 # Set the following variables before building:
 # Path to original CalculiX source (e.g. $(HOME)/ccx_2.16/src )
-CCX             = $(HOME)/CalculiX/ccx_2.16/src
+CCX             = $(HOME)/CalculiX/ccx/src
 
 ### Change these if you built SPOOLES, ARPACK, or yaml-cpp from source ###
 # SPOOLES include flags (e.g. -I$(HOME)/SPOOLES.2.2 )
-SPOOLES_INCLUDE   = -I/usr/include/spooles/
+SPOOLES_INCLUDE   = -I$(HOME)/SPOOLES.2.2
 # SPOOLES library flags (e.g. $(HOME)/SPOOLES.2.2/spooles.a)
-SPOOLES_LIBS      = -lspooles
+SPOOLES_LIBS      = $(HOME)/SPOOLES.2.2/spooles.a
 #
 # ARPACK include flags (e.g. -I$(HOME)/ARPACK)
-ARPACK_INCLUDE    =
+ARPACK_INCLUDE    = -I$(HOME)/ARPACK
 # ARPACK library flags (e.g. $(HOME)/ARPACK/libarpack_INTEL.a)
-ARPACK_LIBS       = -larpack -llapack -lblas
+ARPACK_LIBS       = $(HOME)/ARPACK/libarpack_INTEL.a #-larpack -llapack -lblas
 #
 # yaml-cpp include flags (e.g. -I$(HOME)/yaml-cpp/include)
-YAML_INCLUDE      = -I/usr/include/
+YAML_INCLUDE      = -I$(HOME)/yaml-cpp-0.6.2/include
 # yaml-cpp library flags (e.g. -L$(HOME)/yaml-cpp/build -lyaml-cpp)
-YAML_LIBS         = -lyaml-cpp
+YAML_LIBS         = -L$(HOME)/yaml-cpp-0.6.2/build -lyaml-cpp
 
 # Get the CFLAGS and LIBS from pkg-config (preCICE version >= 1.4.0).
 # If pkg-config cannot find the libprecice.pc meta-file, you may need to set the
@@ -40,18 +40,19 @@ INCLUDES = \
 	$(YAML_INCLUDE)
 
 LIBS = \
+	$(HOME)/SPOOLES.2.2/MT/src/spoolesMT.a \
 	$(SPOOLES_LIBS) \
 	$(PKGCONF_LIBS) \
 	-lstdc++ \
 	$(YAML_LIBS) \
 	$(ARPACK_LIBS) \
 	-lpthread -lm -lc
-
+	
 # Compilers and flags
 #CFLAGS = -g -Wall -std=c++11 -O0 -fopenmp $(INCLUDES) -DARCH="Linux" -DSPOOLES -DARPACK -DMATRIXSTORAGE
 #FFLAGS = -g -Wall -O0 -fopenmp $(INCLUDES)
 
-CFLAGS = -Wall -O3 -fopenmp $(INCLUDES) -DARCH="Linux" -DSPOOLES -DARPACK -DMATRIXSTORAGE
+CFLAGS = -Wall -O3 -fopenmp $(INCLUDES) -DARCH="Linux" -DSPOOLES -DARPACK -DMATRIXSTORAGE -DUSE_MT
 
 # OS-specific options
 UNAME_S := $(shell uname -s)

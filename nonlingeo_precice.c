@@ -86,7 +86,8 @@ void nonlingeo_precice(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **l
 	     ITG *network,char *orname,double *vel,ITG *nef,
 	     double *velo,double *veloo,double *energy,ITG *itempuser,
 		 /* Adapter: Add variables for the participant name and the config file */
-         char * preciceParticipantName, char * configFilename){
+         char * preciceParticipantName, char * configFilename,
+         ITG irestart,double *accrestart){
 
   char description[13]="            ",*lakon=NULL,jobnamef[396]="",
       *sideface=NULL,*labmpc=NULL,*lakonf=NULL,*env,*envsys,
@@ -161,7 +162,7 @@ void nonlingeo_precice(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **l
          enetoll,dampwk=0.,dampwkini=0.,temax,*tmp=NULL,energystartstep[4],
 	 sizemaxinc,*adblump=NULL,*adcpy=NULL,*aucpy=NULL,*rwork=NULL,
 	 *sol=NULL,*rgwk=NULL,tol,*sb=NULL,*sx=NULL,delcon,alea,
-         *smscale=NULL,dtset,energym=0.,energymold=0.;
+         *smscale=NULL,dtset,energym=0.,energymold=0.,*veoldRestart=NULL;
 
   FILE *f1;
 
@@ -206,6 +207,14 @@ void nonlingeo_precice(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **l
 
   delcon=ctrl[53];alea=ctrl[54];
 
+/*If this is a restart, save restart velocities.
+This is required because of an iout=-1 result evaluation on restart 
+that does not occur with no-restart implicit iterations */
+  if(irestart==1){
+  	NNEW(veoldRestart,double,mt**nk);
+  	memcpy(&veoldRestart[0],&veold[0],sizeof(double)*mt**nk);
+  }
+  
 #ifdef SGI
   ITG token;
 #endif
@@ -1839,7 +1848,15 @@ void nonlingeo_precice(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **l
       /* prediction of the kinematic vectors  */
 
       NNEW(v,double,mt**nk);
-
+      
+      //If this is a restart, fix the accelerations and velocities prior to prediction on the 1st increment
+      if(iinc==1 && irestart==1){
+	  for(k=0;k<(mt**nk);k++){
+	    accold[k] = accrestart[k];
+	    veold[k] = veoldRestart[k];
+	  }
+      }
+      
       prediction(uam,nmethod,&bet,&gam,&dtime,ithermal,nk,veold,accold,v,
 		 &iinc,&idiscon,vold,nactdof,mi,&num_cpus);
 
@@ -3853,7 +3870,7 @@ void nonlingeo_precice(double **cop, ITG *nk, ITG **konp, ITG **ipkonp, char **l
     }
   }
 
-  SFREE(f);SFREE(b);
+  SFREE(f);SFREE(b);SFREE(veoldRestart);
   SFREE(xbounact);SFREE(xforcact);SFREE(xloadact);SFREE(xbodyact);
   if(*nbody>0) SFREE(ipobody);if(inewton==1){SFREE(cgr);}
   SFREE(fext);SFREE(ampli);SFREE(xbounini);SFREE(xstiff);

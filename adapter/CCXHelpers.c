@@ -189,7 +189,10 @@ void getTetraFaceCenters( ITG * elements, ITG * faces, ITG numElements, ITG * ko
 
 	// Node numbering for faces of tetrahedral elements (in the documentation the number is + 1)
 	// Numbering is the same for first and second order elements
-	int faceNodes[4][3] = { { 0,1,2 }, { 0,3,1 }, { 1,3,2 }, { 2,3,0 } };
+	//int faceNodes[4][3] = { { 0,1,2 }, { 0,3,1 }, { 1,3,2 }, { 2,3,0 } };
+	
+	//Blaine - use quads
+	int faceNodes[6][4] = { { 0,1,2,3 }, { 4,7,6,5 }, { 0,4,5,1 }, { 1,5,6,2 }, { 2,6,7,3 }, { 3,7,4,0 } };
 
 	ITG i, j;
 
@@ -280,6 +283,10 @@ void getXloadIndices( char const * loadType, ITG * elementIDs, ITG * faceIDs, IT
 	if( strcmp( loadType, "DFLUX" ) == 0 )
 	{
 		faceLabel[0] = (char) 'S';
+	}
+	else if( strcmp( loadType, "DLOAD" ) == 0 )
+	{
+		faceLabel[0] = (char) 'P';
 	}
 	else if( strcmp( loadType, "FILM" ) == 0 )
 	{

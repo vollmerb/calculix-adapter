@@ -687,6 +687,14 @@ void PreciceInterface_ConfigureCouplingData( PreciceInterface * interface, Simul
 			interface->fluxDataID = precicec_getDataID( "Heat-Flux", interface->faceCentersMeshID );
 			printf( "Read data '%s' found with ID # '%d'.\n", config->readDataNames[i],interface->fluxDataID );
 		}
+		else if ( isEqual( config->readDataNames[i], "Pressure" ) )
+		{
+			interface->readData[i] = HEAT_FLUX;
+			interface->xloadIndices = malloc( interface->numElements * sizeof( int ) );
+			getXloadIndices( "DLOAD", interface->elementIDs, interface->faceIDs, interface->numElements, sim->nload, sim->nelemload, sim->sideload, interface->xloadIndices );
+			interface->fluxDataID = precicec_getDataID( "Pressure", interface->faceCentersMeshID );
+			printf( "Read data '%s' found with ID # '%d'.\n", config->readDataNames[i],interface->fluxDataID );
+		}
 		else if ( startsWith( config->readDataNames[i], "Sink-Temperature-" ) )
 		{
 			interface->readData[i] = SINK_TEMPERATURE;

@@ -203,7 +203,7 @@ void getTetraFaceCenters( ITG * elements, ITG * faces, ITG numElements, ITG * ko
 		ITG elementIdx = elements[i] - 1;
 		double x = 0, y = 0, z = 0;
 
-		for( j = 0 ; j < 3 ; j++ )
+		for( j = 0 ; j < 4 ; j++ )
 		{
 
 			ITG nodeNum = faceNodes[faceIdx][j];
@@ -216,9 +216,9 @@ void getTetraFaceCenters( ITG * elements, ITG * faces, ITG numElements, ITG * ko
 			z += co[nodeIdx + 2];
 
 		}
-		faceCenters[i * 3 + 0] = x / 3;
-		faceCenters[i * 3 + 1] = y / 3;
-		faceCenters[i * 3 + 2] = z / 3;
+		faceCenters[i * 3 + 0] = x / 4;
+		faceCenters[i * 3 + 1] = y / 4;
+		faceCenters[i * 3 + 2] = z / 4;
 
 	}
 

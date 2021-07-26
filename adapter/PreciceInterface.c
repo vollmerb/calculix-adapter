@@ -735,6 +735,7 @@ void PreciceInterface_ConfigureCouplingData( PreciceInterface * interface, Simul
 	}
 
   interface->numWriteData = config->numWriteData;
+  interface->writeData = NULL; //Null to avoid free() at end if empty
   if (config->numWriteData > 0) interface->writeData = malloc( config->numWriteData * sizeof( int ) );
 
 	for( i = 0 ; i < config->numWriteData ; i++ )

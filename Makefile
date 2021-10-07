@@ -2,7 +2,7 @@
 # https://github.com/precice/calculix-adapter/wiki/Installation-instructions-for-CalculiX
 # Set the following variables before building:
 # Path to original CalculiX source (e.g. $(HOME)/ccx_2.16/src )
-CCX             = $(HOME)/CalculiX/ccx/src
+CCX             = $(HOME)/CalculiX/ccx_Pardiso/src
 
 ### Change these if you built SPOOLES, ARPACK, or yaml-cpp from source ###
 # SPOOLES include flags (e.g. -I$(HOME)/SPOOLES.2.2 )
@@ -46,13 +46,14 @@ LIBS = \
 	-lstdc++ \
 	$(YAML_LIBS) \
 	$(ARPACK_LIBS) \
-	-lpthread -lm -lc
+	/usr/local/lib/pardiso/libpardiso600-GNU800-X86-64.so \
+	-lpthread -lm -lblas -llapack -lc
 	
 # Compilers and flags
 #CFLAGS = -g -Wall -std=c++11 -O0 -fopenmp $(INCLUDES) -DARCH="Linux" -DSPOOLES -DARPACK -DMATRIXSTORAGE
 #FFLAGS = -g -Wall -O0 -fopenmp $(INCLUDES)
 
-CFLAGS = -Wall -O3 -fopenmp $(INCLUDES) -DARCH="Linux" -DSPOOLES -DARPACK -DMATRIXSTORAGE -DUSE_MT
+CFLAGS = -Wall -O3 -fopenmp $(INCLUDES) -DARCH="Linux" -DSPOOLES -DPARDISO -DARPACK -DMATRIXSTORAGE -DUSE_MT
 
 # OS-specific options
 UNAME_S := $(shell uname -s)
@@ -103,7 +104,7 @@ OCCXC += $(OBJDIR)/ConfigReader.o
 
 
 
-$(OBJDIR)/ccx_preCICE: $(OBJDIR) $(OCCXMAIN) $(OBJDIR)/ccx_2.16.a
+$(OBJDIR)/ccx_preCICE_Pardiso: $(OBJDIR) $(OCCXMAIN) $(OBJDIR)/ccx_2.16.a
 	$(FC) -fopenmp -Wall -O3 -o $@ $(OCCXMAIN) $(OBJDIR)/ccx_2.16.a $(LIBS)
 
 $(OBJDIR)/ccx_2.16.a: $(OCCXF) $(OCCXC)

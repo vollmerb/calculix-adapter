@@ -385,6 +385,11 @@ void Precice_WriteCouplingData( SimulationData * sim )
 					precicec_writeBlockVectorData( interfaces[i]->velocitiesDataID, interfaces[i]->numNodes, interfaces[i]->preciceNodeIDs, interfaces[i]->nodeVectorData );
 					printf( "Writing VELOCITIES coupling data with ID '%d'. \n",interfaces[i]->velocitiesDataID );
 					break;
+				case ACCELERATIONS:
+					getNodeVelocities( interfaces[i]->nodeIDs, interfaces[i]->numNodes, interfaces[i]->dim, sim->accold, sim->mt, interfaces[i]->nodeVectorData );
+					precicec_writeBlockVectorData( interfaces[i]->accelerationsDataID, interfaces[i]->numNodes, interfaces[i]->preciceNodeIDs, interfaces[i]->nodeVectorData );
+					printf( "Writing ACCELERATIONS coupling data with ID '%d'. \n",interfaces[i]->accelerationsDataID );
+					break;
 				case POSITIONS:
 					getNodeCoordinates( interfaces[i]->nodeIDs, interfaces[i]->numNodes, interfaces[i]->dim, sim->co, sim->vold, sim->mt, interfaces[i]->nodeVectorData );
 					precicec_writeBlockVectorData( interfaces[i]->positionsDataID, interfaces[i]->numNodes, interfaces[i]->preciceNodeIDs, interfaces[i]->nodeVectorData );
@@ -462,6 +467,7 @@ void PreciceInterface_Create( PreciceInterface * interface, SimulationData * sim
 	interface->displacementDeltasDataID = -1;
 	interface->positionsDataID = -1;
 	interface->velocitiesDataID = -1;
+	interface->accelerationsDataID = -1;
 	interface->forcesDataID = -1;
 
   // Check if quasi 2D-3D coupling needs to be implemented
@@ -794,6 +800,13 @@ void PreciceInterface_ConfigureCouplingData( PreciceInterface * interface, Simul
 			interface->writeData[i] = VELOCITIES;
 			interface->velocitiesDataID = precicec_getDataID( config->writeDataNames[i], interface->nodesMeshID );
 			printf( "Write data '%s' found with ID # '%d'.\n", config->writeDataNames[i],interface->velocitiesDataID );
+		}
+    else if ( startsWith( config->writeDataNames[i], "Acceleration" ) )
+		{
+			PreciceInterface_EnsureValidNodesMeshID( interface );
+			interface->writeData[i] = ACCELERATIONS;
+			interface->accelerationsDataID = precicec_getDataID( config->writeDataNames[i], interface->nodesMeshID );
+			printf( "Write data '%s' found with ID # '%d'.\n", config->writeDataNames[i],interface->accelerationsDataID );
 		}
     else if ( startsWith( config->writeDataNames[i], "Force" ) )
 		{

@@ -306,6 +306,7 @@ that does not occur with no-restart implicit iterations */
       .ntmat_ = ntmat_,
       .vold = vold,
       .veold = veold,
+      .accold = accold,
       .fn = fn,
       .cocon = cocon,
       .ncocon = ncocon,

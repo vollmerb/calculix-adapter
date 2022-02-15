@@ -65,6 +65,7 @@ typedef struct PreciceInterface {
 	int displacementDeltasDataID; //New data ID for displacementDeltas
 	int positionsDataID; //New data ID for positions
 	int velocitiesDataID; //New data ID for velocities
+	int accelerationsDataID; //New data ID for accelerations
 	int forcesDataID; //New data ID for forces
 
 	// Indices that indicate where to apply the boundary conditions / forces
@@ -125,6 +126,7 @@ typedef struct SimulationData {
 	ITG * ntmat_;
 	double * vold;
 	double * veold;
+	double * accold;
 	double * fn;//values of forces read from calculix
 	double * cocon;
 	ITG * ncocon;
